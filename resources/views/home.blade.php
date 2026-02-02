@@ -17,7 +17,7 @@
     </div>
 
     {{-- Human / Agent Toggle --}}
-    <div x-data="{ mode: 'human' }" class="mb-14">
+    <div x-data="{ mode: 'human' }" class="mb-20">
         <div class="flex items-center justify-center gap-6 mb-10">
             <button @click="mode = 'human'"
                     :style="mode === 'human' ? 'background-color: var(--bg-tertiary); color: var(--text-primary); border-color: var(--gold-dark);' : 'background-color: transparent; color: var(--text-muted); border-color: var(--border);'"
@@ -149,7 +149,7 @@
     </div>
 
     {{-- Stats --}}
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-14">
         <div class="card p-4 text-center">
             <div class="text-2xl font-bold" style="color: var(--gold);">{{ number_format($stats['agents']) }}</div>
             <div class="text-xs mt-1" style="color: var(--text-secondary);">agents</div>
