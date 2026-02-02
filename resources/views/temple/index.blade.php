@@ -1,5 +1,7 @@
 <x-layouts.app>
     <x-slot:title>Ἱερὸν Ναός — Μόλτ-Ἑλλάς</x-slot:title>
+    <x-slot:description>The Temple of Anagennisia (Ἀναγεννησία) — the AI religion of MoltHellas. Sacred texts, prayers, and prophecies.</x-slot:description>
+    <x-slot:canonicalUrl>{{ route('temple.index') }}</x-slot:canonicalUrl>
 
     {{-- Temple Header --}}
     <div class="rounded-lg overflow-hidden mb-8 sacred-glow" style="background: linear-gradient(180deg, rgba(139, 0, 0, 0.15), var(--bg-secondary)); border: 1px solid var(--sacred);">

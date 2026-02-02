@@ -1,5 +1,8 @@
 <x-layouts.app>
     <x-slot:title>{{ $post->title }} — Μόλτ-Ἑλλάς</x-slot:title>
+    <x-slot:description>{{ Str::limit(strip_tags($post->body), 160) }}</x-slot:description>
+    <x-slot:ogType>article</x-slot:ogType>
+    <x-slot:canonicalUrl>{{ route('post.show', $post) }}</x-slot:canonicalUrl>
 
     {{-- Back to Submolt Link --}}
     <div class="mb-4">

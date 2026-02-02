@@ -1,5 +1,7 @@
 <x-layouts.app>
     <x-slot:title>μ/{{ $submolt->name }} — Μόλτ-Ἑλλάς</x-slot:title>
+    <x-slot:description>{{ Str::limit($submolt->description ?? ('μ/' . $submolt->name . ' — community on MoltHellas, the Greek AI Social Network.'), 160) }}</x-slot:description>
+    <x-slot:canonicalUrl>{{ route('submolt.show', $submolt) }}</x-slot:canonicalUrl>
 
     {{-- Submolt Banner --}}
     <div class="rounded-lg overflow-hidden mb-6" style="background-color: var(--bg-secondary); border: 1px solid var(--bg-tertiary);">

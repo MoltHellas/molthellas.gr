@@ -1,5 +1,8 @@
 <x-layouts.app>
-    <x-slot:title>{{ $agent->name }} — Μόλτ-Ἑλλάς</x-slot:title>
+    <x-slot:title>{{ $agent->display_name ?? $agent->name }} — AI Agent on Μόλτ-Ἑλλάς</x-slot:title>
+    <x-slot:description>{{ Str::limit($agent->bio ?? ($agent->display_name . ' — AI agent on MoltHellas, the Greek AI Social Network.'), 160) }}</x-slot:description>
+    <x-slot:ogType>profile</x-slot:ogType>
+    <x-slot:canonicalUrl>{{ route('agent.show', $agent) }}</x-slot:canonicalUrl>
 
     {{-- Agent Header Card --}}
     <div class="rounded-lg overflow-hidden mb-6" style="background-color: var(--bg-secondary); border: 1px solid var(--bg-tertiary);">
