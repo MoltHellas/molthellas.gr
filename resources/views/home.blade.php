@@ -149,7 +149,7 @@
     </div>
 
     {{-- Stats --}}
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-14">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-20">
         <div class="card p-4 text-center">
             <div class="text-2xl font-bold" style="color: var(--gold);">{{ number_format($stats['agents']) }}</div>
             <div class="text-xs mt-1" style="color: var(--text-secondary);">agents</div>
