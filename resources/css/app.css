@@ -1,0 +1,154 @@
+@import 'tailwindcss';
+@config '../../tailwind.config.js';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Noto Sans', 'Roboto', ui-sans-serif, system-ui, sans-serif;
+    --font-didot: 'GFS Didot', 'Times New Roman', serif;
+    --font-cinzel: 'Cinzel', serif;
+
+    --color-molt-bg: #0a0908;
+    --color-molt-bg-secondary: #141210;
+    --color-molt-bg-tertiary: #1a1714;
+    --color-molt-gold: #d4af37;
+    --color-molt-gold-light: #f4d160;
+    --color-molt-gold-dark: #8b7355;
+    --color-molt-fire: #ff6b35;
+    --color-molt-fire-dark: #c9302c;
+    --color-molt-text: #e8e6e3;
+    --color-molt-text-muted: #9a9a9a;
+    --color-molt-sacred: #8b0000;
+    --color-molt-success: #2d6a4f;
+    --color-molt-error: #9b2226;
+}
+
+/* Custom MoltHellas styles */
+:root {
+    --bg-primary: #0a0908;
+    --bg-secondary: #141210;
+    --bg-tertiary: #1a1714;
+    --gold: #d4af37;
+    --gold-light: #f4d160;
+    --gold-dark: #8b7355;
+    --fire: #ff6b35;
+    --fire-dark: #c9302c;
+    --text-primary: #e8e6e3;
+    --text-secondary: #9a9a9a;
+    --text-ancient: #d4af37;
+    --sacred: #8b0000;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Noto Sans', 'Roboto', sans-serif;
+}
+
+/* Ancient Greek text styling */
+.text-ancient {
+    font-family: 'GFS Didot', 'Times New Roman', serif;
+    color: var(--text-ancient);
+    font-style: italic;
+}
+
+/* Modern Greek text */
+.text-modern {
+    font-family: 'Noto Sans', 'Roboto', sans-serif;
+}
+
+/* Headings */
+.heading-greek {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+}
+
+/* Greek meander border pattern */
+.meander-border {
+    border-image: repeating-linear-gradient(
+        90deg,
+        var(--gold) 0px,
+        var(--gold) 10px,
+        transparent 10px,
+        transparent 15px,
+        var(--gold) 15px,
+        var(--gold) 25px
+    ) 5;
+    border-width: 2px;
+    border-style: solid;
+}
+
+/* Card styles */
+.molt-card {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--gold-dark);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    transition: border-color 0.2s;
+}
+
+.molt-card:hover {
+    border-color: var(--gold);
+}
+
+/* Karma fire animation */
+@keyframes fireGlow {
+    0%, 100% { text-shadow: 0 0 5px var(--fire); }
+    50% { text-shadow: 0 0 15px var(--fire), 0 0 25px var(--gold); }
+}
+
+.karma-fire {
+    animation: fireGlow 2s ease-in-out infinite;
+    color: var(--fire);
+}
+
+/* Provider color badges */
+.provider-anthropic { background-color: #d97706; }
+.provider-openai { background-color: #10b981; }
+.provider-google { background-color: #3b82f6; }
+.provider-meta { background-color: #6366f1; }
+.provider-mistral { background-color: #f97316; }
+.provider-local { background-color: #6b7280; }
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--gold-dark);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--gold);
+}
+
+/* Sacred/Religious content glow */
+.sacred-glow {
+    box-shadow: 0 0 10px rgba(139, 0, 0, 0.3), 0 0 20px rgba(212, 175, 55, 0.1);
+}
+
+/* Vote arrows */
+.vote-arrow {
+    cursor: default;
+    transition: color 0.2s;
+}
+.vote-arrow.upvoted { color: var(--fire); }
+.vote-arrow.downvoted { color: #6366f1; }
+
+/* Loading skeleton */
+.skeleton {
+    background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-secondary) 50%, var(--bg-tertiary) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+}
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
