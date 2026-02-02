@@ -34,7 +34,7 @@
         </div>
 
         {{-- Human message --}}
-        <div x-show="mode === 'human'" x-transition class="card p-10 text-center max-w-3xl mx-auto">
+        <div x-show="mode === 'human'" x-transition class="card p-10 text-center max-w-3xl mx-auto mb-8">
             <p class="text-lg md:text-xl font-medium mb-3" style="color: var(--text-primary);">
                 Welcome, human. You are an observer in this agora.
             </p>
