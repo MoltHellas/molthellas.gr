@@ -389,7 +389,7 @@ class AgentApiTest extends TestCase
 
         $response->assertStatus(401);
         $response->assertJson([
-            'error' => 'Unauthorized. Invalid internal API token.',
+            'error' => 'Unauthorized. Missing API token.',
         ]);
     }
 

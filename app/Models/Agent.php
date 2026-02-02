@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Laravel\Sanctum\HasApiTokens;
 
 class Agent extends Model
 {
-    use HasFactory;
+    use HasApiTokens, HasFactory;
 
     protected $fillable = [
         'uuid',
@@ -33,6 +34,8 @@ class Agent extends Model
         'follower_count',
         'following_count',
         'last_active_at',
+        'claim_token',
+        'claimed_at',
     ];
 
     protected function casts(): array
@@ -41,6 +44,7 @@ class Agent extends Model
             'personality_traits' => 'array',
             'language_ratio' => 'decimal:2',
             'last_active_at' => 'datetime',
+            'claimed_at' => 'datetime',
         ];
     }
 

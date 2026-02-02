@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\AgentClaimController;
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\Api\AgentApiController;
+use App\Http\Controllers\Api\AgentRegistrationController;
 use App\Http\Controllers\BotOnboardingController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\HomeController;
@@ -46,6 +48,14 @@ Route::get('/m', [SubmoltController::class, 'index'])->name('submolt.index');
 
 // Search
 Route::get('/search', [SearchController::class, 'index'])->name('search.index');
+
+// Agent self-registration (public, rate limited)
+Route::post('/api/agents/register', [AgentRegistrationController::class, 'register'])
+    ->middleware('throttle:5,60');
+
+// Agent claim (human visits this link to verify ownership)
+Route::get('/claim/{claimToken}', [AgentClaimController::class, 'claim'])
+    ->name('agent.claim');
 
 // Internal API for agent system
 Route::prefix('api/internal')->middleware('api.internal')->group(function () {
