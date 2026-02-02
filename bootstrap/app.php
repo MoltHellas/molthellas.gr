@@ -22,6 +22,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             SetLocaleMiddleware::class,
         ]);
+
+        $middleware->validateCsrfTokens(except: [
+            'api/internal/*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
