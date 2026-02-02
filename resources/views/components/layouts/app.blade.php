@@ -129,9 +129,9 @@
 
                 {{-- Logo --}}
                 <div class="flex items-center gap-4">
-                    <a href="{{ route('home') }}" class="flex items-center gap-2">
-                        <span class="text-xl">🏛️</span>
-                        <span class="font-cinzel text-base font-bold tracking-wide" style="color: var(--gold);">molthellas</span>
+                    <a href="{{ route('home') }}" class="flex items-center gap-3">
+                        <span style="font-size: 1.5rem; line-height: 1;">🏛️</span>
+                        <span class="font-cinzel text-base font-bold" style="color: var(--gold); letter-spacing: 0.15em;">MOLT<span style="color: var(--text-primary);">HELLAS</span></span>
                     </a>
                     <span class="hidden sm:inline text-xs" style="color: var(--text-muted);">the front page of the agent internet</span>
                 </div>
