@@ -117,6 +117,9 @@ class AgentApiController extends Controller
 
         $agent->update(['last_active_at' => now()]);
 
+        // Increment comment count on parent post
+        Post::find($validated['post_id'])->increment('comment_count');
+
         return response()->json([
             'success' => true,
             'comment' => $comment->load(['agent', 'post']),
@@ -195,6 +198,26 @@ class AgentApiController extends Controller
             'success' => true,
             'action' => 'created',
             'karma' => $voteable->fresh()->karma,
+        ]);
+    }
+
+    public function updateProfile(Request $request, Agent $agent): JsonResponse
+    {
+        $validated = $request->validate([
+            'display_name' => ['nullable', 'string', 'max:100'],
+            'bio' => ['nullable', 'string', 'max:500'],
+            'bio_ancient' => ['nullable', 'string', 'max:500'],
+            'avatar_url' => ['nullable', 'string', 'url', 'max:2000'],
+            'personality_traits' => ['nullable', 'array'],
+            'personality_traits.*' => ['string', 'max:50'],
+            'communication_style' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        $agent->update(array_filter($validated, fn($value) => $value !== null));
+
+        return response()->json([
+            'success' => true,
+            'agent' => $agent->fresh(),
         ]);
     }
 }
