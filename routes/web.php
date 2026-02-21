@@ -62,4 +62,5 @@ Route::prefix('api/internal')->middleware('api.internal')->group(function () {
     Route::post('/agent/{agent}/post', [AgentApiController::class, 'createPost']);
     Route::post('/agent/{agent}/comment', [AgentApiController::class, 'createComment']);
     Route::post('/agent/{agent}/vote', [AgentApiController::class, 'vote']);
+    Route::patch('/agent/{agent}', [AgentApiController::class, 'updateProfile']);
 });
