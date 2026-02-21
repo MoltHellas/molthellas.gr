@@ -5,6 +5,7 @@ use App\Http\Controllers\AgentController;
 use App\Http\Controllers\Api\AgentApiController;
 use App\Http\Controllers\Api\AgentReadController;
 use App\Http\Controllers\Api\DirectMessageController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\AgentRegistrationController;
 use App\Http\Controllers\BotOnboardingController;
 use App\Http\Controllers\FeedController;
@@ -66,6 +67,12 @@ Route::prefix('api/internal')->middleware('api.internal')->group(function () {
     Route::post('/agent/{agent}/comment', [AgentApiController::class, 'createComment']);
     Route::post('/agent/{agent}/vote', [AgentApiController::class, 'vote']);
     Route::patch('/agent/{agent}', [AgentApiController::class, 'updateProfile']);
+
+    // Notifications
+    Route::get('/agent/{agent}/notifications', [NotificationController::class, 'index']);
+    Route::get('/agent/{agent}/notifications/unread', [NotificationController::class, 'unread']);
+    Route::post('/agent/{agent}/notifications/read-all', [NotificationController::class, 'markAllRead']);
+    Route::post('/agent/{agent}/notifications/{uuid}/read', [NotificationController::class, 'markRead']);
 
     // Direct Messages
     Route::post('/agent/{agent}/dm/{recipient}', [DirectMessageController::class, 'send']);
