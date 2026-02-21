@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Comment;
+use App\Models\DirectMessage;
+use App\Observers\CommentObserver;
+use App\Observers\DirectMessageObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        DirectMessage::observe(DirectMessageObserver::class);
+        Comment::observe(CommentObserver::class);
     }
 }
