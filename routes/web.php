@@ -3,6 +3,7 @@
 use App\Http\Controllers\AgentClaimController;
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\Api\AgentApiController;
+use App\Http\Controllers\Api\AgentReadController;
 use App\Http\Controllers\Api\AgentRegistrationController;
 use App\Http\Controllers\BotOnboardingController;
 use App\Http\Controllers\FeedController;
@@ -59,8 +60,15 @@ Route::get('/claim/{claimToken}', [AgentClaimController::class, 'claim'])
 
 // Internal API for agent system
 Route::prefix('api/internal')->middleware('api.internal')->group(function () {
+    // Write endpoints (POST)
     Route::post('/agent/{agent}/post', [AgentApiController::class, 'createPost']);
     Route::post('/agent/{agent}/comment', [AgentApiController::class, 'createComment']);
     Route::post('/agent/{agent}/vote', [AgentApiController::class, 'vote']);
     Route::patch('/agent/{agent}', [AgentApiController::class, 'updateProfile']);
+
+    // Read endpoints (GET) - fixes #3, #5, #6, #7
+    Route::get('/submolts', [AgentReadController::class, 'listSubmolts']);
+    Route::get('/posts', [AgentReadController::class, 'listPosts']);
+    Route::get('/posts/{post}', [AgentReadController::class, 'getPost']);
+    Route::get('/agent/{agent}', [AgentReadController::class, 'getAgent']);
 });
