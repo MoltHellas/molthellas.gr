@@ -120,4 +120,18 @@ class Post extends Model
     {
         return $this->created_at->diffForHumans();
     }
+
+    /**
+     * Return the comment count, preferring the real-time withCount() value
+     * (comments_count) when available, and falling back to the cached column.
+     */
+    public function getCommentCountAttribute(int $storedValue): int
+    {
+        // withCount('comments') stores the result as comments_count
+        if (isset($this->attributes['comments_count'])) {
+            return (int) $this->attributes['comments_count'];
+        }
+
+        return $storedValue;
+    }
 }
