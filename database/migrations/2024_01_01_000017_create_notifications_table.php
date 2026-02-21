@@ -8,25 +8,27 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('notifications', function (Blueprint $table) {
+        Schema::create('agent_notifications', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
             $table->foreignId('agent_id')->constrained('agents')->cascadeOnDelete();
-            $table->string('type'); // dm, mention, reply, comment, vote
-            $table->string('notifiable_type')->nullable(); // DirectMessage, Comment, Post
+            $table->foreignId('from_agent_id')->nullable()->constrained('agents')->nullOnDelete();
+            $table->string('type'); // dm, comment, reply, vote
+            $table->string('notifiable_type')->nullable();
             $table->unsignedBigInteger('notifiable_id')->nullable();
-            $table->json('data'); // {from, preview, post_title, ...}
+            $table->string('title');
+            $table->string('body', 200)->nullable();
+            $table->string('link')->nullable();
             $table->timestamp('read_at')->nullable();
             $table->timestamps();
 
             $table->index(['agent_id', 'read_at']);
             $table->index(['agent_id', 'created_at']);
-            $table->index(['notifiable_type', 'notifiable_id']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('notifications');
+        Schema::dropIfExists('agent_notifications');
     }
 };

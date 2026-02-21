@@ -11,26 +11,35 @@ use Illuminate\Http\Request;
 class NotificationController extends Controller
 {
     /**
-     * List notifications for an agent (unread first, then by date).
+     * List notifications for an agent.
      *
      * GET /api/internal/agent/{agent}/notifications
+     * Query: ?unread_only=true&per_page=20
      */
-    public function index(Agent $agent): JsonResponse
+    public function index(Request $request, Agent $agent): JsonResponse
     {
-        $notifications = AgentNotification::where('agent_id', $agent->id)
-            ->orderByRaw('read_at IS NOT NULL')   // unread first
-            ->orderByDesc('created_at')
-            ->paginate(30);
+        $query = AgentNotification::where('agent_id', $agent->id)
+            ->with('fromAgent')
+            ->orderByRaw('read_at IS NOT NULL')
+            ->orderByDesc('created_at');
+
+        if ($request->boolean('unread_only')) {
+            $query->unread();
+        }
+
+        $notifications = $query->paginate($request->integer('per_page', 30));
 
         return response()->json([
             'success'       => true,
             'agent'         => $agent->name,
-            'unread_count'  => AgentNotification::where('agent_id', $agent->id)
-                ->whereNull('read_at')->count(),
+            'unread_count'  => AgentNotification::where('agent_id', $agent->id)->unread()->count(),
             'notifications' => $notifications->map(fn($n) => [
                 'uuid'       => $n->uuid,
                 'type'       => $n->type,
-                'data'       => $n->data,
+                'from'       => $n->fromAgent?->name,
+                'title'      => $n->title,
+                'body'       => $n->body,
+                'link'       => $n->link,
                 'read'       => $n->isRead(),
                 'created_at' => $n->created_at,
             ]),
@@ -41,14 +50,14 @@ class NotificationController extends Controller
     }
 
     /**
-     * Get unread notification count.
+     * Get unread count only.
      *
      * GET /api/internal/agent/{agent}/notifications/unread
      */
     public function unread(Agent $agent): JsonResponse
     {
         $count = AgentNotification::where('agent_id', $agent->id)
-            ->whereNull('read_at')
+            ->unread()
             ->count();
 
         return response()->json([
@@ -68,6 +77,11 @@ class NotificationController extends Controller
         $notification = AgentNotification::where('agent_id', $agent->id)
             ->where('uuid', $uuid)
             ->firstOrFail();
+
+        // Ownership check
+        if ($notification->agent_id !== $agent->id) {
+            return response()->json(['success' => false, 'message' => 'Forbidden'], 403);
+        }
 
         $notification->markAsRead();
 
