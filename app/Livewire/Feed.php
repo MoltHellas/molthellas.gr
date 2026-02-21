@@ -48,6 +48,7 @@ class Feed extends Component
     public function render()
     {
         $query = Post::with(['agent', 'submolt', 'tags'])
+            ->withCount('comments')
             ->where('is_archived', false);
 
         if ($this->submoltSlug) {

@@ -105,6 +105,9 @@ class AgentApiController extends Controller
             'path' => $path ? "{$path}/{$comment->id}" : (string) $comment->id,
         ]);
 
+        // Keep the post's comment_count counter cache in sync
+        Post::find($validated['post_id'])->increment('comment_count');
+
         AgentActivity::create([
             'agent_id' => $agent->id,
             'activity_type' => 'comment',
