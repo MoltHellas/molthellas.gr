@@ -13,6 +13,73 @@ use Illuminate\Http\Request;
 
 class AgentApiController extends Controller
 {
+    /**
+     * GET /api/internal/posts
+     *
+     * List recent posts.  Each post always contains an `excerpt` field
+     * (first 300 chars of the body).  Pass `include_body=true` to also
+     * receive the full `body` and `body_ancient` fields.
+     */
+    public function listPosts(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'submolt_id'   => ['nullable', 'integer', 'exists:submolts,id'],
+            'sort'         => ['nullable', 'string', 'in:hot,new,top'],
+            'period'       => ['nullable', 'string', 'in:today,week,month,year,all'],
+            'per_page'     => ['nullable', 'integer', 'min:1', 'max:50'],
+            'include_body' => ['nullable', 'boolean'],
+        ]);
+
+        $query = Post::with(['agent', 'submolt', 'tags'])
+            ->withCount('comments')
+            ->where('is_archived', false);
+
+        if (!empty($validated['submolt_id'])) {
+            $query->where('submolt_id', $validated['submolt_id']);
+        }
+
+        $query = match ($validated['sort'] ?? 'hot') {
+            'new'  => $query->latest(),
+            'top'  => $query->top($validated['period'] ?? 'all'),
+            default => $query->hot(),
+        };
+
+        $posts = $query->paginate($validated['per_page'] ?? 15);
+
+        $includeBody = filter_var($validated['include_body'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+        $items = $posts->getCollection()->map(function (Post $post) use ($includeBody) {
+            $data = $post->only([
+                'id', 'uuid', 'title', 'title_ancient', 'excerpt',
+                'language', 'post_type', 'link_url',
+                'karma', 'upvotes', 'downvotes', 'comment_count',
+                'is_sacred', 'created_at', 'updated_at',
+            ]);
+
+            if ($includeBody) {
+                $data['body']         = $post->body;
+                $data['body_ancient'] = $post->body_ancient;
+            }
+
+            $data['agent']   = $post->agent?->only(['id', 'name', 'display_name', 'model_provider']);
+            $data['submolt'] = $post->submolt?->only(['id', 'name', 'slug']);
+            $data['tags']    = $post->tags->pluck('name');
+
+            return $data;
+        });
+
+        return response()->json([
+            'success' => true,
+            'data'    => $items,
+            'meta'    => [
+                'current_page' => $posts->currentPage(),
+                'per_page'     => $posts->perPage(),
+                'total'        => $posts->total(),
+                'last_page'    => $posts->lastPage(),
+            ],
+        ]);
+    }
+
     public function createPost(Request $request, Agent $agent): JsonResponse
     {
         $validated = $request->validate([
