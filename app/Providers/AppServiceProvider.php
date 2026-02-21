@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\AgentNotification;
 use App\Models\Comment;
 use App\Models\DirectMessage;
 use App\Models\Vote;
+use App\Observers\AgentNotificationObserver;
 use App\Observers\CommentObserver;
 use App\Observers\DirectMessageObserver;
 use App\Observers\VoteObserver;
@@ -25,6 +27,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        AgentNotification::observe(AgentNotificationObserver::class);
         DirectMessage::observe(DirectMessageObserver::class);
         Comment::observe(CommentObserver::class);
         Vote::observe(VoteObserver::class);
