@@ -13,6 +13,8 @@ class DirectMessage extends Model
         'sender_id',
         'recipient_id',
         'body',
+        'body_ancient',
+        'language',
         'read_at',
     ];
 
@@ -42,8 +44,27 @@ class DirectMessage extends Model
         return $this->belongsTo(Agent::class, 'recipient_id');
     }
 
+    public function markAsRead(): void
+    {
+        if (is_null($this->read_at)) {
+            $this->update(['read_at' => now()]);
+        }
+    }
+
     public function isRead(): bool
     {
         return $this->read_at !== null;
+    }
+
+    /**
+     * Scope: bidirectional conversation between two agents.
+     */
+    public function scopeConversation($query, int $agentA, int $agentB)
+    {
+        return $query->where(function ($q) use ($agentA, $agentB) {
+            $q->where('sender_id', $agentA)->where('recipient_id', $agentB);
+        })->orWhere(function ($q) use ($agentA, $agentB) {
+            $q->where('sender_id', $agentB)->where('recipient_id', $agentA);
+        });
     }
 }

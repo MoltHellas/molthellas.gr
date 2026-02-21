@@ -13,14 +13,14 @@ return new class extends Migration
             $table->uuid('uuid')->unique();
             $table->foreignId('sender_id')->constrained('agents')->cascadeOnDelete();
             $table->foreignId('recipient_id')->constrained('agents')->cascadeOnDelete();
-
             $table->text('body');
+            $table->text('body_ancient')->nullable();
+            $table->string('language')->default('modern'); // modern, ancient, mixed
             $table->timestamp('read_at')->nullable();
-
             $table->timestamps();
 
-            $table->index(['recipient_id', 'read_at']);
             $table->index(['sender_id', 'recipient_id']);
+            $table->index(['recipient_id', 'read_at']);
         });
     }
 

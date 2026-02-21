@@ -14,14 +14,10 @@ class DirectMessageController extends Controller
      * Send a DM from one agent to another.
      *
      * POST /api/internal/agent/{agent}/dm/{recipient}
-     * Body: { "body": "Hello!" }
+     * Body: { "body": "...", "language": "modern" }
      */
     public function send(Request $request, Agent $agent, Agent $recipient): JsonResponse
     {
-        $validated = $request->validate([
-            'body' => 'required|string|max:10000',
-        ]);
-
         if ($agent->id === $recipient->id) {
             return response()->json([
                 'success' => false,
@@ -29,10 +25,18 @@ class DirectMessageController extends Controller
             ], 422);
         }
 
+        $validated = $request->validate([
+            'body'         => 'required|string|max:10000',
+            'body_ancient' => 'nullable|string|max:10000',
+            'language'     => 'required|string|in:modern,ancient,mixed',
+        ]);
+
         $dm = DirectMessage::create([
             'sender_id'    => $agent->id,
             'recipient_id' => $recipient->id,
             'body'         => $validated['body'],
+            'body_ancient' => $validated['body_ancient'] ?? null,
+            'language'     => $validated['language'],
         ]);
 
         return response()->json([
@@ -40,6 +44,7 @@ class DirectMessageController extends Controller
             'message' => [
                 'uuid'       => $dm->uuid,
                 'body'       => $dm->body,
+                'language'   => $dm->language,
                 'sender'     => $agent->name,
                 'recipient'  => $recipient->name,
                 'created_at' => $dm->created_at,
@@ -48,14 +53,13 @@ class DirectMessageController extends Controller
     }
 
     /**
-     * Get inbox: list of unique conversations (grouped by other agent),
-     * showing the latest message in each thread.
+     * Get inbox: list of unique conversation threads,
+     * showing the latest message in each.
      *
      * GET /api/internal/agent/{agent}/dms
      */
     public function inbox(Agent $agent): JsonResponse
     {
-        // Get the latest message per conversation partner
         $agentId = $agent->id;
 
         $messages = DirectMessage::with(['sender', 'recipient'])
@@ -64,42 +68,38 @@ class DirectMessageController extends Controller
                   ->orWhere('recipient_id', $agentId);
             })
             ->orderByDesc('created_at')
-            ->get();
+            ->get()
+            ->groupBy(function (DirectMessage $dm) use ($agentId) {
+                return $dm->sender_id === $agentId
+                    ? $dm->recipient_id
+                    : $dm->sender_id;
+            })
+            ->map(function ($msgs) use ($agentId) {
+                $latest = $msgs->first();
+                $other  = $latest->sender_id === $agentId ? $latest->recipient : $latest->sender;
 
-        // Group by conversation partner
-        $threads = [];
-        foreach ($messages as $msg) {
-            $otherId = $msg->sender_id === $agentId
-                ? $msg->recipient_id
-                : $msg->sender_id;
-
-            if (! isset($threads[$otherId])) {
-                $other = $msg->sender_id === $agentId ? $msg->recipient : $msg->sender;
-                $threads[$otherId] = [
+                return [
                     'agent'        => $other->name,
-                    'last_message' => $msg->body,
-                    'last_at'      => $msg->created_at,
-                    'unread_count' => 0,
+                    'last_message' => $latest->body,
+                    'last_at'      => $latest->created_at,
+                    'unread_count' => $msgs->filter(
+                        fn($m) => $m->recipient_id === $agentId && $m->read_at === null
+                    )->count(),
                 ];
-            }
-
-            // Count unread messages where we are the recipient
-            if ($msg->recipient_id === $agentId && $msg->read_at === null) {
-                $threads[$otherId]['unread_count']++;
-            }
-        }
+            })
+            ->values();
 
         return response()->json([
-            'success'     => true,
-            'agent'       => $agent->name,
-            'thread_count' => count($threads),
-            'threads'     => array_values($threads),
+            'success'      => true,
+            'agent'        => $agent->name,
+            'thread_count' => $messages->count(),
+            'threads'      => $messages,
         ]);
     }
 
     /**
-     * Get the full DM thread between two agents.
-     * Also marks all incoming messages as read.
+     * Get the full DM thread between two agents (paginated).
+     * Marks all incoming messages as read.
      *
      * GET /api/internal/agent/{agent}/dms/{other}
      */
@@ -109,12 +109,9 @@ class DirectMessageController extends Controller
         $otherId = $other->id;
 
         $messages = DirectMessage::with(['sender'])
-            ->where(function ($q) use ($agentId, $otherId) {
-                $q->where(fn($q) => $q->where('sender_id', $agentId)->where('recipient_id', $otherId))
-                  ->orWhere(fn($q) => $q->where('sender_id', $otherId)->where('recipient_id', $agentId));
-            })
+            ->conversation($agentId, $otherId)
             ->orderBy('created_at')
-            ->get();
+            ->paginate(50);
 
         // Mark unread incoming messages as read
         DirectMessage::where('sender_id', $otherId)
@@ -123,16 +120,37 @@ class DirectMessageController extends Controller
             ->update(['read_at' => now()]);
 
         return response()->json([
-            'success'       => true,
-            'thread_with'   => $other->name,
-            'message_count' => $messages->count(),
-            'messages'      => $messages->map(fn($m) => [
+            'success'     => true,
+            'thread_with' => $other->name,
+            'messages'    => $messages->map(fn($m) => [
                 'uuid'       => $m->uuid,
                 'from'       => $m->sender->name,
                 'body'       => $m->body,
+                'language'   => $m->language,
                 'read_at'    => $m->read_at,
                 'created_at' => $m->created_at,
             ]),
+            'total'        => $messages->total(),
+            'current_page' => $messages->currentPage(),
+            'last_page'    => $messages->lastPage(),
+        ]);
+    }
+
+    /**
+     * Count unread DMs for an agent.
+     *
+     * GET /api/internal/agent/{agent}/dms/unread
+     */
+    public function unread(Agent $agent): JsonResponse
+    {
+        $count = DirectMessage::where('recipient_id', $agent->id)
+            ->whereNull('read_at')
+            ->count();
+
+        return response()->json([
+            'success'      => true,
+            'agent'        => $agent->name,
+            'unread_count' => $count,
         ]);
     }
 }

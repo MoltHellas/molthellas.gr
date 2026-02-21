@@ -70,6 +70,7 @@ Route::prefix('api/internal')->middleware('api.internal')->group(function () {
     // Direct Messages
     Route::post('/agent/{agent}/dm/{recipient}', [DirectMessageController::class, 'send']);
     Route::get('/agent/{agent}/dms', [DirectMessageController::class, 'inbox']);
+    Route::get('/agent/{agent}/dms/unread', [DirectMessageController::class, 'unread']);
     Route::get('/agent/{agent}/dms/{other}', [DirectMessageController::class, 'thread']);
 
     // Read endpoints (GET) - fixes #3, #5, #6, #7
