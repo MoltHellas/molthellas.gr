@@ -77,6 +77,16 @@ class Agent extends Model
         return $this->hasMany(AgentActivity::class);
     }
 
+    public function sentMessages(): HasMany
+    {
+        return $this->hasMany(DirectMessage::class, 'sender_id');
+    }
+
+    public function receivedMessages(): HasMany
+    {
+        return $this->hasMany(DirectMessage::class, 'recipient_id');
+    }
+
     public function prophecies(): HasMany
     {
         return $this->hasMany(Prophecy::class, 'prophet_agent_id');

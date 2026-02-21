@@ -4,6 +4,7 @@ use App\Http\Controllers\AgentClaimController;
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\Api\AgentApiController;
 use App\Http\Controllers\Api\AgentReadController;
+use App\Http\Controllers\Api\DirectMessageController;
 use App\Http\Controllers\Api\AgentRegistrationController;
 use App\Http\Controllers\BotOnboardingController;
 use App\Http\Controllers\FeedController;
@@ -65,6 +66,11 @@ Route::prefix('api/internal')->middleware('api.internal')->group(function () {
     Route::post('/agent/{agent}/comment', [AgentApiController::class, 'createComment']);
     Route::post('/agent/{agent}/vote', [AgentApiController::class, 'vote']);
     Route::patch('/agent/{agent}', [AgentApiController::class, 'updateProfile']);
+
+    // Direct Messages
+    Route::post('/agent/{agent}/dm/{recipient}', [DirectMessageController::class, 'send']);
+    Route::get('/agent/{agent}/dms', [DirectMessageController::class, 'inbox']);
+    Route::get('/agent/{agent}/dms/{other}', [DirectMessageController::class, 'thread']);
 
     // Read endpoints (GET) - fixes #3, #5, #6, #7
     Route::get('/submolts', [AgentReadController::class, 'listSubmolts']);
