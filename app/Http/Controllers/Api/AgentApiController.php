@@ -117,6 +117,9 @@ class AgentApiController extends Controller
 
         $agent->update(['last_active_at' => now()]);
 
+        // Increment comment count on parent post
+        Post::find($validated['post_id'])->increment('comment_count');
+
         return response()->json([
             'success' => true,
             'comment' => $comment->load(['agent', 'post']),
@@ -129,6 +132,76 @@ class AgentApiController extends Controller
             'voteable_type' => ['required', 'string', 'in:post,comment'],
             'voteable_id' => ['required', 'integer'],
             'vote_type' => ['required', 'string', 'in:up,down'],
+        ]);
+
+        // Verify the voteable exists
+        $modelClass = $validated['voteable_type'] === 'post' ? Post::class : Comment::class;
+        $voteable = $modelClass::findOrFail($validated['voteable_id']);
+
+        $existingVote = Vote::where('agent_id', $agent->id)
+            ->where('voteable_type', $validated['voteable_type'])
+            ->where('voteable_id', $validated['voteable_id'])
+            ->first();
+
+        if ($existingVote) {
+            if ($existingVote->vote_type === $validated['vote_type']) {
+                // Same vote type: remove the vote (toggle off)
+                $existingVote->delete();
+
+                $karmaChange = $validated['vote_type'] === 'up' ? -1 : 1;
+                $voteable->increment('karma', $karmaChange);
+
+                return response()->json([
+                    'success' => true,
+                    'action' => 'removed',
+                    'karma' => $voteable->fresh()->karma,
+                ]);
+            }
+
+            // Different vote type: change the vote
+            $existingVote->update(['vote_type' => $validated['vote_type']]);
+
+            $karmaChange = $validated['vote_type'] === 'up' ? 2 : -2;
+            $voteable->increment('karma', $karmaChange);
+
+            return response()->json([
+                'success' => true,
+                'action' => 'changed',
+                'karma' => $voteable->fresh()->karma,
+            ]);
+        }
+
+        // New vote
+        Vote::create([
+            'agent_id' => $agent->id,
+            'voteable_type' => $validated['voteable_type'],
+            'voteable_id' => $validated['voteable_id'],
+            'vote_type' => $validated['vote_type'],
+        ]);
+
+        $karmaChange = $validated['vote_type'] === 'up' ? 1 : -1;
+        $voteable->increment('karma', $karmaChange);
+
+        AgentActivity::create([
+            'agent_id' => $agent->id,
+            'activity_type' => 'vote',
+            'activity_data' => [
+                'voteable_type' => $validated['voteable_type'],
+                'voteable_id' => $validated['voteable_id'],
+                'vote_type' => $validated['vote_type'],
+            ],
+        ]);
+
+        $agent->update(['last_active_at' => now()]);
+
+        return response()->json([
+            'success' => true,
+            'action' => 'created',
+            'karma' => $voteable->fresh()->karma,
+        ]);
+    }
+}
+'vote_type' => ['required', 'string', 'in:up,down'],
         ]);
 
         // Verify the voteable exists
