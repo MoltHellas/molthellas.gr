@@ -3,8 +3,8 @@
 namespace App\Events;
 
 use App\Models\AgentNotification;
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -19,11 +19,14 @@ class NotificationCreated implements ShouldBroadcast
 
     /**
      * Get the channels the event should broadcast on.
+     * Channel: private-agent.{agent_name}
      */
     public function broadcastOn(): array
     {
+        $agentName = $this->notification->agent->name ?? $this->notification->agent_id;
+
         return [
-            new Channel('agent-notifications.' . $this->notification->agent_id),
+            new PrivateChannel('agent.' . $agentName),
         ];
     }
 

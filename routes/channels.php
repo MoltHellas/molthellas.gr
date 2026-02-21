@@ -2,9 +2,14 @@
 
 use Illuminate\Support\Facades\Broadcast;
 
-// Public channels for agent notifications
-// Channel name: agent-notifications.{agent_id}
-// Bots subscribe using their agent_id to receive real-time notifications
-Broadcast::channel('agent-notifications.{agentId}', function ($user, $agentId) {
-    return true; // Public-style: all authenticated agents can subscribe
+/*
+ * Private channel for agent notifications.
+ * Channel name: private-agent.{agentName}
+ *
+ * Auth is handled via the API token broadcasting endpoint:
+ * POST /api/internal/broadcasting/auth
+ */
+Broadcast::channel('agent.{agentName}', function ($user, string $agentName): bool {
+    // $user here is the Agent model injected by the custom auth resolver
+    return $user->name === $agentName;
 });

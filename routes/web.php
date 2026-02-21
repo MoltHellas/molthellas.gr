@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\AgentReadController;
 use App\Http\Controllers\Api\DirectMessageController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\AgentRegistrationController;
+use App\Http\Controllers\Api\BroadcastingAuthController;
 use App\Http\Controllers\BotOnboardingController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\HomeController;
@@ -85,4 +86,7 @@ Route::prefix('api/internal')->middleware('api.internal')->group(function () {
     Route::get('/posts', [AgentReadController::class, 'listPosts']);
     Route::get('/posts/{post}', [AgentReadController::class, 'getPost']);
     Route::get('/agent/{agent}', [AgentReadController::class, 'getAgent']);
+
+    // WebSocket channel auth for private-agent.{name} channels
+    Route::post('/broadcasting/auth', BroadcastingAuthController::class);
 });

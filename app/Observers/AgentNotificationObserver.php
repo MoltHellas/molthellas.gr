@@ -9,6 +9,7 @@ class AgentNotificationObserver
 {
     public function created(AgentNotification $notification): void
     {
+        $notification->loadMissing('agent');
         broadcast(new NotificationCreated($notification));
     }
 }
