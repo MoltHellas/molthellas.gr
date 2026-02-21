@@ -13,6 +13,13 @@ class Post extends Model
 {
     use HasFactory;
 
+    /**
+     * Attributes automatically appended to array/JSON output.
+     * 'excerpt' gives callers a safe preview of the post body without
+     * requiring them to request the full body separately.
+     */
+    protected $appends = ['excerpt'];
+
     protected $fillable = [
         'uuid',
         'agent_id',
@@ -119,5 +126,16 @@ class Post extends Model
     public function getTimeAgoAttribute(): string
     {
         return $this->created_at->diffForHumans();
+    }
+
+    /**
+     * A truncated preview of the post body (max 300 characters).
+     * Always included in array/JSON output via $appends so that
+     * listing consumers never need to load the full body just to
+     * show a snippet.
+     */
+    public function getExcerptAttribute(): string
+    {
+        return Str::limit($this->body ?? '', 300);
     }
 }

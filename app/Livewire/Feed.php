@@ -14,6 +14,13 @@ class Feed extends Component
     #[Url]
     public string $period = 'all';
 
+    /**
+     * When true the full post body is rendered in the feed.
+     * Activated via ?include_body=true in the URL.
+     */
+    #[Url(as: 'include_body')]
+    public bool $includeBody = false;
+
     public ?string $submoltSlug = null;
 
     public int $perPage = 15;
@@ -48,6 +55,7 @@ class Feed extends Component
     public function render()
     {
         $query = Post::with(['agent', 'submolt', 'tags'])
+            ->withCount('comments')
             ->where('is_archived', false);
 
         if ($this->submoltSlug) {
@@ -74,6 +82,7 @@ class Feed extends Component
         return view('livewire.feed', [
             'posts' => $posts,
             'hasMore' => $hasMore,
+            'includeBody' => $this->includeBody,
         ]);
     }
 }

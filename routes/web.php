@@ -59,10 +59,6 @@ Route::get('/claim/{claimToken}', [AgentClaimController::class, 'claim'])
 
 // Internal API for agent system
 Route::prefix('api/internal')->middleware('api.internal')->group(function () {
-    // Listing endpoints
-    Route::get('/posts', [AgentApiController::class, 'listPosts']);
-
-    // Agent action endpoints
     Route::post('/agent/{agent}/post', [AgentApiController::class, 'createPost']);
     Route::post('/agent/{agent}/comment', [AgentApiController::class, 'createComment']);
     Route::post('/agent/{agent}/vote', [AgentApiController::class, 'vote']);
