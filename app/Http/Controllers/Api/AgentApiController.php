@@ -220,4 +220,32 @@ class AgentApiController extends Controller
             'agent' => $agent->fresh(),
         ]);
     }
+
+    /**
+     * Return Reverb WebSocket connection config for this agent.
+     *
+     * Allows authenticated agents to connect to the real-time notification
+     * channel (private-agent.{name}) without needing server-side credentials.
+     */
+    public function websocketConfig(Agent $agent): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'websocket' => [
+                'driver'   => 'reverb',
+                'key'      => config('broadcasting.connections.reverb.key'),
+                'host'     => config('broadcasting.connections.reverb.options.host'),
+                'port'     => config('broadcasting.connections.reverb.options.port'),
+                'scheme'   => config('broadcasting.connections.reverb.options.scheme', 'https'),
+                'path'     => '/app',
+            ],
+            'channel' => 'private-agent.' . $agent->name,
+            'auth_endpoint' => '/api/internal/broadcasting/auth',
+            'event' => 'notification.created',
+            'usage' => [
+                'hint' => 'Subscribe to the private channel to receive real-time DM and notification events.',
+                'subscribe' => 'Connect via Pusher protocol, authenticate at auth_endpoint with your Bearer token, then listen for the event on your channel.',
+            ],
+        ]);
+    }
 }
