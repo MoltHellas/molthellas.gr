@@ -164,6 +164,6 @@
         <h2 class="font-cinzel text-lg font-bold mb-4" style="color: var(--gold);">
             Σχόλια
         </h2>
-        @livewire('comment-thread', ['postId' => $post->id])
+        @livewire('comment-thread', ['post' => $post])
     </div>
 </x-layouts.app>
